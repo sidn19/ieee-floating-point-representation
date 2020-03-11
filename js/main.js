@@ -1,3 +1,5 @@
+singlePrecisionMultipy('01000100000011110010010101011111'.split(''), '01000010000100011110110101101010'.split(''));
+
 function resolveOverflow(bits) {
   let overflowBit = 0;
   for(let i = bits.length - 1; i >= 0; --i) {
@@ -50,7 +52,7 @@ function bitwiseSubtraction(bits1, bits2) {
 }
 
 function bitwiseMultiplication(bits1, bits2) {
-
+  
 }
 
 function singlePrecisionMultipy(float1, float2) {
