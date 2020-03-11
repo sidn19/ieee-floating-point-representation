@@ -52,7 +52,23 @@ function bitwiseSubtraction(bits1, bits2) {
 }
 
 function bitwiseMultiplication(bits1, bits2) {
+  let answer = new Array(bits1.length + bits2.length).fill(0);
+  let rows = new Array(bits2.length).fill(new Array(bits1.length + bits2.length).fill(0));
+  for(let i = bits1.length - 1; i >= 0; --i) {
+    for(let j = bits2.length - 1; j >= 0; --j) {
+      // bitwise and
+      rows[i][i + j] = bits1[i] & bits2[j];
+    }
+  }
+  // add rows
+  for(let i = 0; i < answer.length; ++i) {
+    for(let j = 0; j < rows.length; ++j) {
+      answer[i] += rows[j][i];
+    }
+  }
+  // TODO: resolve overflow
   
+  return answer;
 }
 
 function singlePrecisionMultipy(float1, float2) {
