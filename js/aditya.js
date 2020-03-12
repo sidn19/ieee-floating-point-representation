@@ -45,10 +45,10 @@ function bitwiseMultiplication(bits1, bits2) {
   console.log(bits2);
   let answer = new Array(bits1.length + bits2.length).fill(0);
   let rows = new Array(bits2.length).fill(new Array(bits1.length + bits2.length).fill(0));
-  for(let i = bits1.length - 1; i >= 0; --i) {
-    for(let j = bits2.length - 1; j >= 0; --j) {
+  for(let i = bits2.length - 1; i >= 0; --i) {
+    for(let j = bits1.length - 1; j >= 0; --j) {
       // bitwise and
-      if (bits1[i] === 1 && bits2[j] === 1) {
+      if (bits1[j] === 1 && bits2[i] === 1) {
         rows[bits2.length - i][i + j] = 1;
       }
     }
