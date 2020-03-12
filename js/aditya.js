@@ -41,26 +41,27 @@ function bitwiseSubtraction(bits1, bits2) {
 }
 
 function bitwiseMultiplication(bits1, bits2) {
-  console.log(bits1);
-  console.log(bits2);
   let answer = new Array(bits1.length + bits2.length).fill(0);
-  let rows = new Array(bits2.length).fill(new Array(bits1.length + bits2.length).fill(0));
+  let rows = new Array(bits2.length);
+  for(let i = 0; i < rows.length; ++i) {
+    rows[i] = new Array(bits1.length + bits2.length).fill(0);
+  }
+
   for(let i = bits2.length - 1; i >= 0; --i) {
     for(let j = bits1.length - 1; j >= 0; --j) {
       // bitwise and
       if (bits1[j] === 1 && bits2[i] === 1) {
-        rows[bits2.length - i][i + j] = 1;
+        rows[bits2.length - i - 1][i + j + 1] = 1;
       }
     }
   }
-  console.log(rows);
   // add rows
   for(let i = 0; i < answer.length; ++i) {
     for(let j = 0; j < rows.length; ++j) {
       answer[i] += rows[j][i];
     }
   }
-  //resolveOverflow(answer);
+  resolveOverflow(answer);
   return answer;
 }
 
@@ -75,14 +76,18 @@ function singlePrecisionMultipy(float1, float2) {
   for(let i = 1; i < 9; ++i) {
     temp[i - 1] = float1[i];
   }
-  bitwiseAddition(temp, float2.slice(1, 9))
+  bitwiseAddition(temp, float2.slice(1, 9));
   bitwiseSubtraction(temp, [0, 1, 1, 1, 1, 1, 1, 1]);
   // store in answer
   for(let i = 1; i < 9; ++i) {
     answer[i] = temp[i - 1];
   }
   temp = bitwiseMultiplication(float1.slice(9), float2.slice(9));
-  console.log(temp);
+  // normalize temp
+  let addedExponent = 0;
+  for(let i = temp.length - 1; i >= 0; --i) {
+    
+  }
   /*
   for(let i = 9; i < answer.length; ++i) {
     answer[i] = temp[i];
