@@ -1,3 +1,24 @@
+function data() {
+  return {
+    disableDoubleUp: true,
+    disableDoubleDown: true,
+    disableDown: true,
+    section: 0,
+    multiplicand: null,
+    multiplier: null,
+    previousSection() {
+      if (this.section > 0) {
+        this.section -= 1;
+      }
+    },
+    nextSection() {
+      if (!this.disableDown) {
+        this.section += 1;
+      }
+    }
+  };
+}
+
 singlePrecisionMultipy('01000100000011110010010101011111'.split('').map(val => parseInt(val)), '01000010000100011110110101101010'.split('').map(val => parseInt(val)));
 
 function resolveOverflow(bits) {
@@ -86,7 +107,7 @@ function singlePrecisionMultipy(float1, float2) {
   // normalize temp
   let addedExponent = 0;
   for(let i = temp.length - 1; i >= 0; --i) {
-    
+
   }
   /*
   for(let i = 9; i < answer.length; ++i) {
@@ -94,4 +115,31 @@ function singlePrecisionMultipy(float1, float2) {
   }
   console.log(answer);
   */
+}
+
+function decimalToBinary() {
+	var num = parseFloat(document.getElementById('decimal-number').value);
+	var intPart = Math.floor(num);
+	var floatPart = num - intPart;
+	var ieeRep = new Array(32).fill(0);
+	var i = 0;
+	var tempNum = [];
+	var tempNum2 = [];
+	// sign bit
+	ieeRep[i++] = num < 0 ? 1 : 0;
+	// getting number in its entirety
+	while(intPart > 0) {
+		tempNum.push(intPart % 2);
+		intPart = Math.floor(intPart / 2);
+	}
+	// reverse
+	tempNum.reverse();
+
+	for(let j = 0; j < 7; ++j) {
+		floatPart *= 2;
+		tempNum2.push(floatPart >= 1 ? 1 : 0);
+		floatPart = floatPart >= 1 ? 1 - floatPart : floatPart;
+	}
+	console.log(tempNum);
+	console.log(tempNum2);
 }

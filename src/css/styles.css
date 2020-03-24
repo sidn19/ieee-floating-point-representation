@@ -1,0 +1,110 @@
+@font-face {
+  font-family: 'Open Sans';
+  src: url('../fonts/OpenSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('../fonts/OpenSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  src: url('../fonts/OpenSans-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+
+* {
+  font-family: 'Open Sans';
+  user-select: none;
+}
+
+html {
+  overflow: hidden;
+}
+
+[x-cloak] {
+  display: none;
+}
+
+.custom-icon {
+  font-size: 6rem;
+  position: absolute;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: 0.6s;
+  padding: 2px 20px;
+}
+
+.custom-icon:active {
+  background-image: initial !important;
+  background-color: #ccc;
+  transition: 0s;
+}
+
+.custom-icon.disabled {
+  background-image: initial !important;
+  background-color: #fff;
+  opacity: 0.1 !important;
+  transition: 0s;
+  cursor: not-allowed;
+}
+
+.fa-angle-up {
+  top: 10px;
+  left: 45%;
+}
+
+.fa-angle-down {
+  bottom: 10px;
+  left: 45%;
+}
+
+.fa-angle-double-up {
+  right: 10px;
+  top: 10px;
+  opacity: 0.2;
+}
+
+.fa-angle-double-down {
+  right: 10px;
+  bottom: 10px;
+  opacity: 0.2;
+}
+
+.fa-angle-up:hover, .fa-angle-double-up:hover {
+  background-image: linear-gradient(#ccc, #fff);
+  opacity: 1;
+}
+
+.fa-angle-down:hover, .fa-angle-double-down:hover {
+  background-image: linear-gradient(#fff, #ccc);
+  opacity: 1;
+}
+
+div.section {
+  margin: 25% auto;
+  text-align: center;
+  transition: 4s;
+}
+
+div.section.hiddenAbove {
+  margin-top: -500px;
+}
+
+div.section.hiddenBelow {
+  margin-top: 1000px;
+}
+
+input[type=number] {
+  display: block;
+  margin: 20px auto;
+  padding: 20px;
+  font-size: 2rem;
+  width: 70%;
+}

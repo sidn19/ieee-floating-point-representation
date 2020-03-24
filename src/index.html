@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>IEEE Single Precision Floating Point Multiplication</title>
+    <link rel="shortcut icon" href="icon.jpg">
+    <link rel="stylesheet" href="./css/fontawesome.min.css">
+    <link rel="stylesheet" href="./css/solid.min.css">
+    <link rel="stylesheet" href="./css/styles.css">
+    <script src="./js/alpine.js"></script>
+    <script src="./js/main.js"></script>
+  </head>
+  <body x-data="data()" x-cloak>
+    <i class="fas fa-angle-double-up custom-icon" :class="{ 'disabled': disableDoubleUp }"></i>
+    <i class="fas fa-angle-double-down custom-icon" :class="{ 'disabled': disableDoubleDown }"></i>
+    <i class="fas fa-angle-up custom-icon" @click="previousSection()" :class="{ 'disabled': section <= 0 }"></i>
+    <i class="fas fa-angle-down custom-icon" @click="nextSection()" :class="{ 'disabled': disableDown }"></i>
+
+    <!-- sections -->
+    <div class="section" :class="{ 'hiddenAbove': section > 0, 'hiddenBelow': section < 0 }">
+      <input type="number" @keydown="disableDown = multiplicand == null || multiplier == null" placeholder="Enter the multiplicand" x-model="multiplicand" />
+      <input type="number" @keydown="disableDown = multiplicand == null || multiplier == null" placeholder="Enter the multiplier" x-model="multiplier" />
+    </div>
+  </body>
+</html>
