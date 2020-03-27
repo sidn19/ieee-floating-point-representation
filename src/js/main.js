@@ -1,23 +1,27 @@
-function data() {
-  return {
-    disableDoubleUp: true,
-    disableDoubleDown: true,
-    disableDown: true,
-    section: 0,
-    multiplicand: null,
-    multiplier: null,
-    previousSection() {
-      if (this.section > 0) {
-        this.section -= 1;
-      }
-    },
-    nextSection() {
-      if (!this.disableDown) {
-        this.section += 1;
-      }
+const data = () => ({
+  disableDoubleUp: true,
+  disableDoubleDown: true,
+  disableDown: true,
+  section: 0,
+  multiplicand: null,
+  multiplier: null,
+  ieeeMultiplicand: [],
+  ieeeMultiplier: [],
+  previousSection() {
+    if (this.section > 0) {
+      this.section -= 1;
     }
-  };
-}
+  },
+  nextSection() {
+    if (!this.disableDown) {
+      if (this.section === 0) {
+        this.ieeeMultiplicand = decimalToIEEE(this.multiplicand);
+        this.ieeeMultiplier = decimalToIEEE(this.multiplier);
+      }
+      this.section += 1;
+    }
+  }
+})
 
 singlePrecisionMultipy('01000100000011110010010101011111'.split('').map(val => parseInt(val)), '01000010000100011110110101101010'.split('').map(val => parseInt(val)));
 
@@ -117,8 +121,7 @@ function singlePrecisionMultipy(float1, float2) {
   */
 }
 
-function decimalToBinary() {
-	var num = parseFloat(document.getElementById('decimal-number').value);
+function decimalToIEEE(num) {
 	var intPart = Math.floor(num);
 	var floatPart = num - intPart;
 	var ieeRep = new Array(32).fill(0);
