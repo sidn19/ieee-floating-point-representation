@@ -33,7 +33,8 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center
+  justify-content: center;
+  align-items: center;
 }
 
 [x-cloak] {
@@ -66,23 +67,27 @@ body {
 .fa-angle-up {
   top: 10px;
   left: 45%;
+  z-index: 10;
 }
 
 .fa-angle-down {
   bottom: 10px;
   left: 45%;
+  z-index: 10;
 }
 
 .fa-angle-double-up {
   right: 10px;
   top: 10px;
   opacity: 0.2;
+  z-index: 10;
 }
 
 .fa-angle-double-down {
   right: 10px;
   bottom: 10px;
   opacity: 0.2;
+  z-index: 10;
 }
 
 .fa-angle-up:hover, .fa-angle-double-up:hover {
@@ -97,21 +102,50 @@ body {
 
 div.section {
   text-align: center;
-  transition: 1.5s ease-in;
+  transition: 1.2s ease-in;
 }
 
 div.section.hiddenAbove {
   margin-top: -1000px;
+  position: absolute;
 }
 
 div.section.hiddenBelow {
   margin-top: 1000px;
+  position: absolute;
 }
 
-input[type=number] {
+div.sub-section {
+  display: flex;
+  flex-direction: row;
+}
+
+div.inner-sub-section {
+  display: flex;
+  flex-direction: column;
+  padding: 0px 10px;
+}
+
+input[type=text] {
   display: block;
   margin: 20px auto;
   padding: 20px;
   font-size: 2rem;
-  width: 70%;
+  width: 85%;
+  border: 2px solid #271818;
+  border-radius: 8px 30%;
+  outline: none;
+  background-color: #FAFAFA;
+}
+
+input[type=text]:hover {
+  background-color: #F5F5F5;
+}
+
+input[type=text]:focus {
+  background-color: #EEE;
+}
+
+input[type=text].error {
+  border: 2px solid #e00909;
 }

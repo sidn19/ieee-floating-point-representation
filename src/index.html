@@ -18,8 +18,56 @@
 
     <!-- sections -->
     <div class="section" :class="{ 'hiddenAbove': section > 0, 'hiddenBelow': section < 0 }">
-      <input type="number" @keydown="disableDown = multiplicand == null || multiplier == null" placeholder="Enter the multiplicand" x-model="multiplicand" />
-      <input type="number" @keydown="disableDown = multiplicand == null || multiplier == null" placeholder="Enter the multiplier" x-model="multiplier" />
+      <input type="text" title="Please enter a valid decimal number" @keydown="validateInput('multiplicand')" placeholder="Enter the multiplicand" x-model="multiplicand" />
+      <input type="text" title="Please enter a valid decimal number" @keydown="disableDown = multiplicand == null || multiplier == null" placeholder="Enter the multiplier" x-model="multiplier" />
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 1, 'hiddenBelow': section < 1 }">
+      <h1>Binary Conversion</h1>
+      <div class="sub-section">
+        <div class="inner-sub-section">
+          <h2>Multiplicand</h2>
+          <div x-text="multiplicand"></div>
+          <div><i class="fas fa-arrow-down"></i></div>
+          <div x-text="binaryMultiplicandString"></div>
+        </div>
+        <div class="inner-sub-section">
+          <h2>Multiplier</h2>
+          <div x-text="multiplier"></div>
+          <div><i class="fas fa-arrow-down"></i></div>
+          <div x-text="binaryMultiplierString"></div>
+        </div>
+      </div>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 2, 'hiddenBelow': section < 2 }">
+      <h1>Biased Exponent Calculation</h1>
+      <div class="sub-section">
+        <div class="inner-sub-section">
+          <h2>Multiplicand</h2>
+          <h3>Normalization & Rounding</h3>
+          <div x-text="binaryMultiplicandString"></div>
+          <div><i class="fas fa-arrow-down"></i></div>
+          <div>
+            <span x-text="normalizedMultiplicandString"></span> &times; 2<sup x-text="multiplicandExponent"></sup>
+          </div>
+          <h3>Adding Bias</h3>
+          <div>
+            <span x-text="multiplicandExponent"></span> + 127 = <span x-text="multiplicandBiasedExponent"></span>
+          </div>
+        </div>
+        <div class="inner-sub-section">
+          <h2>Multiplier</h2>
+          <h3>Normalization & Rounding</h3>
+          <div x-text="binaryMultiplierString"></div>
+          <div><i class="fas fa-arrow-down"></i></div>
+          <div>
+            <span x-text="normalizedMultiplierString"></span> &times; 2<sup x-text="multiplierExponent"></sup>
+          </div>
+          <h3>Adding Bias</h3>
+          <div>
+            <span x-text="multiplierExponent"></span> + 127 = <span x-text="multiplierBiasedExponent"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </body>
 </html>

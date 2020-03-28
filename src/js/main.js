@@ -5,6 +5,16 @@ const data = () => ({
   section: 0,
   multiplicand: null,
   multiplier: null,
+  tempMultiplicand: [],
+  tempMultiplier: [],
+  binaryMultiplicandString: '',
+  binaryMultiplierString: '',
+  normalizedMultiplicandString: '',
+  normalizedMultiplierString: '',
+  multiplicandExponent: 0,
+  multiplierExponent: 0,
+  multiplicandBiasedExponent: 0,
+  multiplierBiasedExponent: 0,
   ieeeMultiplicand: [],
   ieeeMultiplier: [],
   previousSection() {
@@ -15,10 +25,26 @@ const data = () => ({
   nextSection() {
     if (!this.disableDown) {
       if (this.section === 0) {
-        this.ieeeMultiplicand = decimalToIEEE(this.multiplicand);
-        this.ieeeMultiplier = decimalToIEEE(this.multiplier);
+        this.tempMultiplicand = decimalToBinary(this.multiplicand);
+        this.tempMultiplier = decimalToBinary(this.multiplier);
+        this.binaryMultiplicandString = `${(this.tempMultiplicand.sign === 0 ? '-' : '') + this.tempMultiplicand.characteristic.join('')}.${this.tempMultiplicand.mantissa.join('')}`;
+        this.binaryMultiplierString = `${(this.tempMultiplier.sign === 0 ? '-' : '') + this.tempMultiplier.characteristic.join('')}.${this.tempMultiplier.mantissa.join('')}`;
+      }
+      else if (this.section === 1) {
+        this.tempMultiplicand = normalizeBinary(this.tempMultiplicand);
+        this.tempMultiplier = normalizeBinary(this.tempMultiplier);
+        this.multiplierExponent = this.tempMultiplier.exponent;
+        this.multiplicandExponent = this.tempMultiplicand.exponent;
+        this.normalizedMultiplicandString = `${(this.tempMultiplicand.sign === 0 ? '-' : '') + this.tempMultiplicand.characteristic}.${this.tempMultiplicand.mantissa.join('')}`;
+        this.normalizedMultiplierString = `${(this.tempMultiplier.sign === 0 ? '-' : '') + this.tempMultiplier.characteristic}.${this.tempMultiplier.mantissa.join('')}`;
+        this.multiplicandBiasedExponent = 127 + this.multiplicandExponent;
+        this.multiplierBiasedExponent = 127 + this.multiplierExponent;
       }
       this.section += 1;
+    },
+    validateInput(type) {
+      this.disableDown = this.multiplicand == null || this.multiplier == null;
+      // validate if input is a number
     }
   }
 })
@@ -121,28 +147,65 @@ function singlePrecisionMultipy(float1, float2) {
   */
 }
 
-function decimalToIEEE(num) {
-	var intPart = Math.floor(num);
-	var floatPart = num - intPart;
-	var ieeRep = new Array(32).fill(0);
-	var i = 0;
-	var tempNum = [];
-	var tempNum2 = [];
-	// sign bit
-	ieeRep[i++] = num < 0 ? 1 : 0;
-	// getting number in its entirety
-	while(intPart > 0) {
-		tempNum.push(intPart % 2);
-		intPart = Math.floor(intPart / 2);
-	}
-	// reverse
-	tempNum.reverse();
+function decimalToBinary(num) {
+  var negative = num < 0;
+  var tempNum = [];
+  var tempNum2 = [];
 
-	for(let j = 0; j < 7; ++j) {
+  if (!negative) {
+    var intPart = Math.floor(num);
+  	var floatPart = num - intPart;
+  }
+  else {
+    var intPart = Math.ceil(num);
+  	var floatPart = Math.abs(num - intPart);
+  }
+
+
+  intPart = Math.abs(intPart);
+	if (intPart >= 1) {
+    while(intPart > 0) {
+  		tempNum.push(intPart % 2);
+  		intPart = Math.floor(intPart / 2);
+  	}
+  	// reverse
+  	tempNum.reverse();
+  }
+	else {
+    tempNum.push(0);
+  }
+
+	for(let j = 0; j < 23; ++j) {
 		floatPart *= 2;
 		tempNum2.push(floatPart >= 1 ? 1 : 0);
-		floatPart = floatPart >= 1 ? 1 - floatPart : floatPart;
+		floatPart = floatPart >= 1 ? floatPart - Math.floor(floatPart) : floatPart;
 	}
-	console.log(tempNum);
-	console.log(tempNum2);
+  return {
+    characteristic: tempNum,
+    mantissa: tempNum2,
+    sign: negative ? 0 : 1
+  };
+}
+
+function normalizeBinary(binaryParts) {
+  let result = {
+    characteristic: 1,
+    mantissa: [],
+    exponent: 0,
+    sign: binaryParts.sign
+  };
+  if (binaryParts.characteristic.length > 1 || Math.abs(binaryParts.characteristic[0]) === 1) {
+    result.exponent = binaryParts.characteristic.length - 1;
+    result.mantissa = binaryParts.characteristic.slice(1).concat(binaryParts.mantissa).slice(0, 23);
+  }
+  else {
+    for(let i = 0; i < binaryParts.mantissa.length; ++i) {
+      --result.exponent;
+      if (binaryParts.mantissa[i] === 1) {
+        result.mantissa = binaryParts.mantissa.slice(i + 1, i + 24);
+        break;
+      }
+    }
+  }
+  return result;
 }
