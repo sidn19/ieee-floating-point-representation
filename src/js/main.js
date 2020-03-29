@@ -35,18 +35,23 @@ const data = () => ({
   mantissaOverflow: false,
   firstSection() {
     if (!this.disableDoubleUp) {
-      this.disableDown = false;
-      this.disableDoubleUp = true;
-      this.section = 0;
+      while(this.section > 0) {
+        this.previousSection();
+      }
+    }
+  },
+  lastSection() {
+    if (!this.disableDoubleDown) {
+      while(this.section <= 7) {
+        this.nextSection();
+      }
     }
   },
   previousSection() {
     if (this.section > 0) {
       this.section -= 1;
       this.disableDown = false;
-      if (this.section === 0) {
-        this.disableDoubleUp = true;
-      }
+      this.disableDoubleDown = false;
     }
   },
   nextSection() {
@@ -199,6 +204,8 @@ const data = () => ({
       }
       else if (this.section === 7) {
         this.decimalResult = ieeeToDecimal(this.ieee);
+        this.disableDown = true;
+        this.disableDoubleDown = true;
       }
       this.section += 1;
     }
@@ -207,6 +214,7 @@ const data = () => ({
     // validate if input is a number
     this[type].error = isNaN(parseFloat(this[type].input)) || !isFinite(this[type].input);
     this.disableDown = this.multiplicand.input == null || this.multiplier.input == null || this.multiplicand.error || this.multiplier.error;
+    this.disableDoubleDown = this.disableDown;
   }
 });
 
@@ -364,7 +372,7 @@ function binaryCharacteristicToDecimal(binary) {
 }
 
 function binaryMantissaToDecimal(binary) {
-  let base = 1.0;
+  let base = 0.5;
   let decimal = 0;
   for (let i = 0; i < binary.length; ++i) {
     decimal += binary[i] * base;
@@ -376,5 +384,5 @@ function binaryMantissaToDecimal(binary) {
 function ieeeToDecimal(ieee) {
   let exponent = binaryCharacteristicToDecimal(ieee.slice(1, 9)) - 127;
   let mantissa = binaryMantissaToDecimal(ieee.slice(9));
-  return (mantissa + (2 ** exponent)) * (ieee[0] === 0 ? 1 : -1);
+  return ((1 + mantissa) * (2 ** exponent)) * (ieee[0] === 0 ? 1 : -1);
 }

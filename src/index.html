@@ -11,8 +11,8 @@
     <script src="./js/main.js"></script>
   </head>
   <body x-data="data()" x-cloak>
-    <i class="fas fa-angle-double-up custom-icon" @click="firstSection()" :class="{ 'disabled': disableDoubleUp }"></i>
-    <i class="fas fa-angle-double-down custom-icon" :class="{ 'disabled': disableDoubleDown }"></i>
+    <i class="fas fa-angle-double-up custom-icon" @click="firstSection()" :class="{ 'disabled': disableDoubleUp || section <= 0 }"></i>
+    <i class="fas fa-angle-double-down custom-icon" @click="lastSection()" :class="{ 'disabled': disableDoubleDown }"></i>
     <i class="fas fa-angle-up custom-icon" @click="previousSection()" :class="{ 'disabled': section <= 0 }"></i>
     <i class="fas fa-angle-down custom-icon" @click="nextSection()" :class="{ 'disabled': disableDown }"></i>
 
