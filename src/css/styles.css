@@ -191,3 +191,7 @@ div.digit.mantissa {
 div.digit.sign:nth-child(2), div.digit.exponent:nth-child(10) {
   border-right: 1px solid #000;
 }
+
+div.digit.single {
+  border: 1px solid #000;
+}

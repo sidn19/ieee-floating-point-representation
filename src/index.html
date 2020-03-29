@@ -11,7 +11,7 @@
     <script src="./js/main.js"></script>
   </head>
   <body x-data="data()" x-cloak>
-    <i class="fas fa-angle-double-up custom-icon" :class="{ 'disabled': disableDoubleUp }"></i>
+    <i class="fas fa-angle-double-up custom-icon" @click="firstSection()" :class="{ 'disabled': disableDoubleUp }"></i>
     <i class="fas fa-angle-double-down custom-icon" :class="{ 'disabled': disableDoubleDown }"></i>
     <i class="fas fa-angle-up custom-icon" @click="previousSection()" :class="{ 'disabled': section <= 0 }"></i>
     <i class="fas fa-angle-down custom-icon" @click="nextSection()" :class="{ 'disabled': disableDown }"></i>
@@ -93,6 +93,95 @@
           <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
         </template>
       </div>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 4, 'hiddenBelow': section < 4 }">
+      <h1>Checking if either equal zero (early out)</h1>
+      <div class="sub-section">
+        <template x-for="[i, digit] in Object.entries(multiplicand.ieee)">
+          <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-times"></i></h2>
+      <div class="sub-section">
+        <template x-for="[i, digit] in Object.entries(multiplier.ieee)">
+          <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-equals" x-show="equalsZero"></i></h2>
+      <h2><i class="fas fa-not-equal" x-show="!equalsZero"></i></h2>
+      <div class="sub-section">
+        <template x-for="[i, digit] in Object.entries(new Array(32).fill(0))">
+          <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
+        </template>
+      </div>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 5, 'hiddenBelow': section < 5 }">
+      <h1>Signed Bit Calculation</h1>
+      <div class="sub-section" style="align-items: center; justify-content: space-evenly;">
+        <div x-text="multiplicand.ieee[0]" class="digit sign single"></div>
+        <h2>XOR</h2>
+        <div x-text="multiplier.ieee[0]" class="digit sign single"></div>
+        <h2><i class="fas fa-equals"></i></h2>
+        <div x-text="ieee[0]" class="digit sign single"></div>
+      </div>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 6, 'hiddenBelow': section < 6 }">
+      <h1>Biased Exponent Calculation</h1>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in multiplicand.ieee.slice(1, 9)">
+          <div x-text="digit" class="digit exponent"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-plus"></i></h2>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in multiplier.ieee.slice(1, 9)">
+          <div x-text="digit" class="digit exponent"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-minus"></i></h2>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in [0].concat(new Array(7).fill(1))">
+          <div x-text="digit" class="digit exponent"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-equals"></i></h2>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in ieee.slice(1, 9)">
+          <div x-text="digit" class="digit exponent"></div>
+        </template>
+      </div>
+      <h2 x-show="exponentOverflow">Exponent Overflow</h2>
+      <h2 x-show="exponentUnderflow">Exponent Underflow</h2>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 7, 'hiddenBelow': section < 7 }">
+      <h1>Mantissa Calculation (Multiplying & Normalization)</h1>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in [1, '.'].concat(multiplicand.ieee.slice(9))">
+          <div x-text="digit" class="digit mantissa"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-times"></i></h2>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in [1, '.'].concat(multiplier.ieee.slice(9))">
+          <div x-text="digit" class="digit mantissa"></div>
+        </template>
+      </div>
+      <h2><i class="fas fa-equals"></i></h2>
+      <div class="sub-section" style="justify-content: center">
+        <template x-for="digit in [1, '.'].concat(ieee.slice(9))">
+          <div x-text="digit" class="digit mantissa"></div>
+        </template>
+      </div>
+      <h2 x-show="mantissaOverflow">Adding 1 to the Biased Exponent Calculation due to Mantissa overflow</h2>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 8, 'hiddenBelow': section < 8 }">
+      <h1>Result</h1>
+      <div class="sub-section">
+        <template x-for="[i, digit] in Object.entries(ieee)">
+          <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
+        </template>
+      </div>
+      <h2>Decimal: <span x-text="decimalResult"></span></h2>
     </div>
   </body>
 </html>

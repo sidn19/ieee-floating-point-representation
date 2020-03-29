@@ -27,13 +27,30 @@ const data = () => ({
     exponentBinaryString: '',
     ieee: []
   },
+  equalsZero: false,
+  ieee: new Array(32).fill(0),
+  decimalResult: 0,
+  exponentOverflow: false,
+  exponentUnderflow: false,
+  mantissaOverflow: false,
+  firstSection() {
+    if (!this.disableDoubleUp) {
+      this.disableDown = false;
+      this.disableDoubleUp = true;
+      this.section = 0;
+    }
+  },
   previousSection() {
-    this.disableDown = false;
     if (this.section > 0) {
       this.section -= 1;
+      this.disableDown = false;
+      if (this.section === 0) {
+        this.disableDoubleUp = true;
+      }
     }
   },
   nextSection() {
+    this.disableDoubleUp = false;
     if (!this.disableDown) {
       if (this.section === 0) {
         // convert to binary
@@ -107,6 +124,82 @@ const data = () => ({
         this.multiplicand.ieee = [this.multiplicand.temp.sign].concat(this.multiplicand.exponentBinary.characteristic).concat(this.multiplicand.temp.mantissa);
         this.multiplier.ieee = [this.multiplier.temp.sign].concat(this.multiplier.exponentBinary.characteristic).concat(this.multiplier.temp.mantissa);
       }
+      else if (this.section === 3) {
+        if (checkZero(this.multiplicand.ieee) || checkZero(this.multiplier.ieee)) {
+          this.equalsZero = true;
+          this.disableDoubleDown = true;
+          this.disableDown = true;
+        }
+        else {
+          this.equalsZero = false;
+          this.disableDoubleDown = false;
+          this.disableDown = false;
+        }
+      }
+      else if (this.section === 4) {
+        if (this.multiplicand.ieee[0] === this.multiplier.ieee[0]) {
+          this.ieee[0] = 0;
+        }
+        else {
+          this.ieee[0] = 1;
+        }
+      }
+      else if (this.section === 5) {
+        if (this.multiplicand.biasedExponent + this.multiplier.biasedExponent - 127 > 255) {
+          // exponent overflow
+          this.exponentOverflow = true;
+          this.exponentUnderflow = false;
+          this.disableDown = true;
+          this.disableDoubleDown = true;
+        }
+        else if (this.multiplicand.biasedExponent + this.multiplier.biasedExponent - 127 < 0) {
+          // exponent underflow
+          this.exponentUnderflow = true;
+          this.exponentOverflow = false;
+          this.disableDown = true;
+          this.disableDoubleDown = true;
+        }
+        else {
+          this.exponentUnderflow = false;
+          this.exponentOverflow = false;
+          // add exponents then subtract bias
+          let temp = new Array(8).fill(0);
+          for(let i = 1; i < 9; ++i) {
+            temp[i - 1] = this.multiplicand.ieee[i];
+          }
+          bitwiseAddition(temp, this.multiplier.ieee.slice(1, 9));
+          bitwiseSubtraction(temp, [0, 1, 1, 1, 1, 1, 1, 1]);
+
+          for(let i = 1; i < 9; ++i) {
+            this.ieee[i] = temp[i - 1];
+          }
+        }
+      }
+      else if (this.section === 6) {
+        let temp = bitwiseMultiplication([1].concat(this.multiplicand.ieee.slice(9)), [1].concat(this.multiplier.ieee.slice(9)));
+        this.mantissaOverflow = temp[0] === 1;
+        if (this.mantissaOverflow) {
+          // adding 1 to exponent
+          let temp2 = this.ieee.slice(1, 9);
+          bitwiseAddition(temp2, [0, 0, 0, 0, 0, 0, 0, 1]);
+          for(let i = 1; i < 9; ++i) {
+            this.ieee[i] = temp2[i - 1];
+          }
+          // ignore first bit of temp
+          for(let i = 9; i < 32; ++i) {
+            this.ieee[i] = temp[i - 8];
+          }
+        }
+        else {
+          // ignore first two bits of temp
+          for(let i = 9; i < 32; ++i) {
+            this.ieee[i] = temp[i - 7];
+          }
+        }
+      }
+      else if (this.section === 7) {
+        this.decimalResult = ieeeToDecimal(this.ieee);
+      }
       this.section += 1;
     }
   },
@@ -115,9 +208,7 @@ const data = () => ({
     this[type].error = isNaN(parseFloat(this[type].input)) || !isFinite(this[type].input);
     this.disableDown = this.multiplicand.input == null || this.multiplier.input == null || this.multiplicand.error || this.multiplier.error;
   }
-})
-
-singlePrecisionMultipy('01000100000011110010010101011111'.split('').map(val => parseInt(val)), '01000010000100011110110101101010'.split('').map(val => parseInt(val)));
+});
 
 function resolveOverflow(bits) {
   let overflowBit = 0;
@@ -184,37 +275,6 @@ function bitwiseMultiplication(bits1, bits2) {
   return answer;
 }
 
-function singlePrecisionMultipy(float1, float2) {
-  let answer = new Array(32).fill(0);
-  // checking signed bits
-  if (float1[0] != float2[0]) {
-    answer[0] = 1;
-  }
-  // add exponents then subtract bias
-  let temp = new Array(8).fill(0);
-  for(let i = 1; i < 9; ++i) {
-    temp[i - 1] = float1[i];
-  }
-  bitwiseAddition(temp, float2.slice(1, 9));
-  bitwiseSubtraction(temp, [0, 1, 1, 1, 1, 1, 1, 1]);
-  // store in answer
-  for(let i = 1; i < 9; ++i) {
-    answer[i] = temp[i - 1];
-  }
-  temp = bitwiseMultiplication(float1.slice(9), float2.slice(9));
-  // normalize temp
-  let addedExponent = 0;
-  for(let i = temp.length - 1; i >= 0; --i) {
-
-  }
-  /*
-  for(let i = 9; i < answer.length; ++i) {
-    answer[i] = temp[i];
-  }
-  console.log(answer);
-  */
-}
-
 function decimalToBinary(num) {
   var negative = num < 0;
   var tempNum = [];
@@ -243,7 +303,7 @@ function decimalToBinary(num) {
     tempNum.push(0);
   }
 
-	for(let j = 0; j < 128; ++j) {
+	for(let j = 0; j < 127; ++j) {
 		floatPart *= 2;
 		tempNum2.push(floatPart >= 1 ? 1 : 0);
 		floatPart = floatPart >= 1 ? floatPart - Math.floor(floatPart) : floatPart;
@@ -280,4 +340,41 @@ function normalizeBinary(binaryParts) {
     result.mantissa = result.mantissa.concat(new Array(23 - result.mantissa.length).fill(0));
   }
   return result;
+}
+
+function checkZero(number) {
+  let zero = true;
+  for(let i = 1; i < number.length; ++i) {
+    if (number[i] === 1) {
+      zero = false;
+      break;
+    }
+  }
+  return zero;
+}
+
+function binaryCharacteristicToDecimal(binary) {
+  let base = 1;
+  let decimal = 0;
+  for (let i = binary.length - 1; i >= 0; --i) {
+    decimal += binary[i] * base;
+    base *= 2;
+  }
+  return decimal;
+}
+
+function binaryMantissaToDecimal(binary) {
+  let base = 1.0;
+  let decimal = 0;
+  for (let i = 0; i < binary.length; ++i) {
+    decimal += binary[i] * base;
+    base /= 2;
+  }
+  return decimal;
+}
+
+function ieeeToDecimal(ieee) {
+  let exponent = binaryCharacteristicToDecimal(ieee.slice(1, 9)) - 127;
+  let mantissa = binaryMantissaToDecimal(ieee.slice(9));
+  return (mantissa + (2 ** exponent)) * (ieee[0] === 0 ? 1 : -1);
 }
