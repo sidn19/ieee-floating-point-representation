@@ -18,23 +18,29 @@
 
     <!-- sections -->
     <div class="section" :class="{ 'hiddenAbove': section > 0, 'hiddenBelow': section < 0 }">
-      <input type="text" title="Please enter a valid decimal number" @keydown="validateInput('multiplicand')" placeholder="Enter the multiplicand" x-model="multiplicand" />
-      <input type="text" title="Please enter a valid decimal number" @keydown="disableDown = multiplicand == null || multiplier == null" placeholder="Enter the multiplier" x-model="multiplier" />
+      <div style="position: relative">
+        <input type="text" :class="{ 'error': multiplicand.error }" title="Please enter a valid decimal number" @keyup="validateInput('multiplicand')" placeholder="Enter the multiplicand" x-model="multiplicand.input" />
+        <span class="error" x-show="multiplicand.error">*Please enter a valid decimal number</span>
+      </div>
+      <div style="position: relative">
+        <input type="text" :class="{ 'error': multiplier.error }" title="Please enter a valid decimal number" @keyup="validateInput('multiplier')" placeholder="Enter the multiplier" x-model="multiplier.input" />
+        <span class="error" x-show="multiplier.error">*Please enter a valid decimal number</span>
+      </div>
     </div>
     <div class="section" :class="{ 'hiddenAbove': section > 1, 'hiddenBelow': section < 1 }">
       <h1>Binary Conversion</h1>
       <div class="sub-section">
         <div class="inner-sub-section">
           <h2>Multiplicand</h2>
-          <div x-text="multiplicand"></div>
+          <div x-text="multiplicand.input"></div>
           <div><i class="fas fa-arrow-down"></i></div>
-          <div x-text="binaryMultiplicandString"></div>
+          <div x-text="multiplicand.binaryString"></div>
         </div>
         <div class="inner-sub-section">
           <h2>Multiplier</h2>
-          <div x-text="multiplier"></div>
+          <div x-text="multiplier.input"></div>
           <div><i class="fas fa-arrow-down"></i></div>
-          <div x-text="binaryMultiplierString"></div>
+          <div x-text="multiplier.binaryString"></div>
         </div>
       </div>
     </div>
@@ -44,29 +50,48 @@
         <div class="inner-sub-section">
           <h2>Multiplicand</h2>
           <h3>Normalization & Rounding</h3>
-          <div x-text="binaryMultiplicandString"></div>
+          <div x-text="multiplicand.binaryString"></div>
           <div><i class="fas fa-arrow-down"></i></div>
           <div>
-            <span x-text="normalizedMultiplicandString"></span> &times; 2<sup x-text="multiplicandExponent"></sup>
+            <span x-text="multiplicand.normalizedString"></span> &times; 2<sup x-text="multiplicand.exponent"></sup>
           </div>
-          <h3>Adding Bias</h3>
+          <h3>Adding Bias & Binary Conversion</h3>
           <div>
-            <span x-text="multiplicandExponent"></span> + 127 = <span x-text="multiplicandBiasedExponent"></span>
+            <span x-text="multiplicand.exponent"></span> + 127 = <span x-text="multiplicand.biasedExponent"></span>
           </div>
+          <div><i class="fas fa-arrow-down"></i></div>
+          <div x-text="multiplicand.exponentBinaryString"></div>
         </div>
         <div class="inner-sub-section">
           <h2>Multiplier</h2>
           <h3>Normalization & Rounding</h3>
-          <div x-text="binaryMultiplierString"></div>
+          <div x-text="multiplier.binaryString"></div>
           <div><i class="fas fa-arrow-down"></i></div>
           <div>
-            <span x-text="normalizedMultiplierString"></span> &times; 2<sup x-text="multiplierExponent"></sup>
+            <span x-text="multiplier.normalizedString"></span> &times; 2<sup x-text="multiplier.exponent"></sup>
           </div>
-          <h3>Adding Bias</h3>
+          <h3>Adding Bias & Binary Conversion</h3>
           <div>
-            <span x-text="multiplierExponent"></span> + 127 = <span x-text="multiplierBiasedExponent"></span>
+            <span x-text="multiplier.exponent"></span> + 127 = <span x-text="multiplier.biasedExponent"></span>
           </div>
+          <div><i class="fas fa-arrow-down"></i></div>
+          <div x-text="multiplier.exponentBinaryString"></div>
         </div>
+      </div>
+    </div>
+    <div class="section" :class="{ 'hiddenAbove': section > 3, 'hiddenBelow': section < 3 }">
+      <h1>IEEE Representation</h1>
+      <h2>Multiplicand</h2>
+      <div class="sub-section">
+        <template x-for="[i, digit] in Object.entries(multiplicand.ieee)">
+          <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
+        </template>
+      </div>
+      <h2>Multiplier</h2>
+      <div class="sub-section">
+        <template x-for="[i, digit] in Object.entries(multiplier.ieee)">
+          <div x-text="digit" class="digit" :class="{'sign': i == 0, 'exponent': i > 0 && i < 9, 'mantissa': i > 8}"></div>
+        </template>
       </div>
     </div>
   </body>

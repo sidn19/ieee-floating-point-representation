@@ -3,21 +3,32 @@ const data = () => ({
   disableDoubleDown: true,
   disableDown: true,
   section: 0,
-  multiplicand: null,
-  multiplier: null,
-  tempMultiplicand: [],
-  tempMultiplier: [],
-  binaryMultiplicandString: '',
-  binaryMultiplierString: '',
-  normalizedMultiplicandString: '',
-  normalizedMultiplierString: '',
-  multiplicandExponent: 0,
-  multiplierExponent: 0,
-  multiplicandBiasedExponent: 0,
-  multiplierBiasedExponent: 0,
-  ieeeMultiplicand: [],
-  ieeeMultiplier: [],
+  multiplicand: {
+    input: null,
+    error: false,
+    temp: [],
+    binaryString: '',
+    normalizedString: '',
+    exponent: 0,
+    biasedExponent: 0,
+    exponentBinary: [],
+    exponentBinaryString: '',
+    ieee: []
+  },
+  multiplier: {
+    input: null,
+    error: false,
+    temp: [],
+    binaryString: '',
+    normalizedString: '',
+    exponent: 0,
+    biasedExponent: 0,
+    exponentBinary: [],
+    exponentBinaryString: '',
+    ieee: []
+  },
   previousSection() {
+    this.disableDown = false;
     if (this.section > 0) {
       this.section -= 1;
     }
@@ -25,27 +36,84 @@ const data = () => ({
   nextSection() {
     if (!this.disableDown) {
       if (this.section === 0) {
-        this.tempMultiplicand = decimalToBinary(this.multiplicand);
-        this.tempMultiplier = decimalToBinary(this.multiplier);
-        this.binaryMultiplicandString = `${(this.tempMultiplicand.sign === 0 ? '-' : '') + this.tempMultiplicand.characteristic.join('')}.${this.tempMultiplicand.mantissa.join('')}`;
-        this.binaryMultiplierString = `${(this.tempMultiplier.sign === 0 ? '-' : '') + this.tempMultiplier.characteristic.join('')}.${this.tempMultiplier.mantissa.join('')}`;
+        // convert to binary
+        this.multiplicand.temp = decimalToBinary(this.multiplicand.input);
+        this.multiplier.temp = decimalToBinary(this.multiplier.input);
+
+        //convert to string
+        if (this.multiplicand.temp.characteristic.length > 23) {
+          this.multiplicand.binaryString = `${(this.multiplicand.temp.sign === 0 ? '' : '-') + this.multiplicand.temp.characteristic.join('').slice(0, 23)}...`;
+        }
+        else {
+          this.multiplicand.binaryString = `${(this.multiplicand.temp.sign === 0 ? '' : '-') + this.multiplicand.temp.characteristic.join('')}.${this.multiplicand.temp.mantissa.join('').slice(0, 23 - this.multiplicand.temp.characteristic.length)}...`;
+        }
+        if (this.multiplier.temp.characteristic.length > 23) {
+          this.multiplier.binaryString = `${(this.multiplier.temp.sign === 0 ? '' : '-') + this.multiplier.temp.characteristic.join('').slice(0, 23)}...`;
+        }
+        else {
+          this.multiplier.binaryString = `${(this.multiplier.temp.sign === 0 ? '' : '-') + this.multiplier.temp.characteristic.join('')}.${this.multiplier.temp.mantissa.join('').slice(0, 23 - this.multiplier.temp.characteristic.length)}...`;
+        }
       }
       else if (this.section === 1) {
-        this.tempMultiplicand = normalizeBinary(this.tempMultiplicand);
-        this.tempMultiplier = normalizeBinary(this.tempMultiplier);
-        this.multiplierExponent = this.tempMultiplier.exponent;
-        this.multiplicandExponent = this.tempMultiplicand.exponent;
-        this.normalizedMultiplicandString = `${(this.tempMultiplicand.sign === 0 ? '-' : '') + this.tempMultiplicand.characteristic}.${this.tempMultiplicand.mantissa.join('')}`;
-        this.normalizedMultiplierString = `${(this.tempMultiplier.sign === 0 ? '-' : '') + this.tempMultiplier.characteristic}.${this.tempMultiplier.mantissa.join('')}`;
-        this.multiplicandBiasedExponent = 127 + this.multiplicandExponent;
-        this.multiplierBiasedExponent = 127 + this.multiplierExponent;
+        // normalize
+        this.multiplicand.temp = normalizeBinary(this.multiplicand.temp);
+        this.multiplier.temp = normalizeBinary(this.multiplier.temp);
+        this.multiplier.exponent = this.multiplier.temp.exponent;
+        this.multiplicand.exponent = this.multiplicand.temp.exponent;
+
+        // convert to string
+        this.multiplicand.normalizedString = `${(this.multiplicand.temp.sign === 0 ? '' : '-') + this.multiplicand.temp.characteristic}.${this.multiplicand.temp.mantissa.join('')}`;
+        this.multiplier.normalizedString = `${(this.multiplier.temp.sign === 0 ? '' : '-') + this.multiplier.temp.characteristic}.${this.multiplier.temp.mantissa.join('')}`;
+
+        // add bias
+        this.multiplicand.biasedExponent = 127 + this.multiplicand.exponent;
+        this.multiplier.biasedExponent = 127 + this.multiplier.exponent;
+
+        // convert to binary
+        this.multiplicand.exponentBinary = decimalToBinary(this.multiplicand.biasedExponent);
+        this.multiplier.exponentBinary = decimalToBinary(this.multiplier.biasedExponent);
+
+        // make it 8 bit long
+        if (this.multiplicand.exponentBinary.characteristic.length <= 8 && this.multiplicand.exponentBinary.sign === 0) {
+          this.multiplicand.exponentBinary.characteristic = new Array(8 - this.multiplicand.exponentBinary.characteristic.length).fill(0).concat(this.multiplicand.exponentBinary.characteristic);
+          // convert to string
+          this.multiplicand.exponentBinaryString = this.multiplicand.exponentBinary.characteristic.join('');
+        }
+        else {
+          this.disableDown = true;
+          if (this.multiplicand.exponentBinary.sign === 1) {
+            this.multiplicand.exponentBinaryString = 'Exponent Underflow';
+          }
+          else {
+            this.multiplicand.exponentBinaryString = 'Exponent Overflow';
+          }
+        }
+        if (this.multiplier.exponentBinary.characteristic.length <= 8 && this.multiplier.exponentBinary.sign === 0) {
+          this.multiplier.exponentBinary.characteristic = new Array(8 - this.multiplier.exponentBinary.characteristic.length).fill(0).concat(this.multiplier.exponentBinary.characteristic);
+          // convert to string
+          this.multiplier.exponentBinaryString = this.multiplier.exponentBinary.characteristic.join('');
+        }
+        else {
+          this.disableDown = true;
+          if (this.multiplier.exponentBinary.sign === 1) {
+            this.multiplier.exponentBinaryString = 'Exponent Underflow';
+          }
+          else {
+            this.multiplier.exponentBinaryString = 'Exponent Overflow';
+          }
+        }
+      }
+      else if (this.section === 2) {
+        this.multiplicand.ieee = [this.multiplicand.temp.sign].concat(this.multiplicand.exponentBinary.characteristic).concat(this.multiplicand.temp.mantissa);
+        this.multiplier.ieee = [this.multiplier.temp.sign].concat(this.multiplier.exponentBinary.characteristic).concat(this.multiplier.temp.mantissa);
       }
       this.section += 1;
-    },
-    validateInput(type) {
-      this.disableDown = this.multiplicand == null || this.multiplier == null;
-      // validate if input is a number
     }
+  },
+  validateInput(type) {
+    // validate if input is a number
+    this[type].error = isNaN(parseFloat(this[type].input)) || !isFinite(this[type].input);
+    this.disableDown = this.multiplicand.input == null || this.multiplier.input == null || this.multiplicand.error || this.multiplier.error;
   }
 })
 
@@ -175,7 +243,7 @@ function decimalToBinary(num) {
     tempNum.push(0);
   }
 
-	for(let j = 0; j < 23; ++j) {
+	for(let j = 0; j < 128; ++j) {
 		floatPart *= 2;
 		tempNum2.push(floatPart >= 1 ? 1 : 0);
 		floatPart = floatPart >= 1 ? floatPart - Math.floor(floatPart) : floatPart;
@@ -183,7 +251,7 @@ function decimalToBinary(num) {
   return {
     characteristic: tempNum,
     mantissa: tempNum2,
-    sign: negative ? 0 : 1
+    sign: negative ? 1 : 0
   };
 }
 
@@ -206,6 +274,10 @@ function normalizeBinary(binaryParts) {
         break;
       }
     }
+  }
+  // pad
+  if (result.mantissa.length < 23) {
+    result.mantissa = result.mantissa.concat(new Array(23 - result.mantissa.length).fill(0));
   }
   return result;
 }
